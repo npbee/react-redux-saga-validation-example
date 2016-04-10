@@ -1,0 +1,78 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background: #f9f9f9;
+    font-family: 'Lato', sans-serif;
+    font-weight: 300;
+}
+
+h1 {
+    font-weight: 300;
+}
+
+input {
+    background: #fff;
+    border: 1px solid #d9d9d9;
+    border-radius: 3px;
+    font-size: 1rem;
+    outline: none;
+    transition: border 100ms;
+    width: 100%;
+}
+
+input:focus {
+    border: 1px solid goldenrod;
+}
+
+input,
+label {
+    display: block;
+    width: 100%;
+}
+
+input,
+label,
+.field-status {
+    padding: 15px 10px;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+    max-width: 95%;
+}
+
+
+.field {
+    position: relative;
+    width: 100%;
+}
+
+.field + .hint {
+    margin-bottom: 30px;
+}
+
+.field-status {
+    color: #999999;
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.field-status__error {
+    color: firebrick;
+}
+
+.field-status--validated {
+    color: lightseagreen;
+}
+
+
+.hint {
+    font-style: italic;
+    font-size: 0.8rem;
+}
+

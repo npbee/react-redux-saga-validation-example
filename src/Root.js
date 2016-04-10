@@ -56,7 +56,7 @@ export class Root extends Component {
         const buttonCopy = submitting ? 'Submitting...' : 'Submit';
 
         return <div className='content'>
-            <h1>Redux Saga Validation</h1>
+            <h1><a href='https://github.com/npbee/react-redux-saga-validation-example'>Redux Saga Validation</a></h1>
 
             <form onSubmit={onSubmit(this.handleSubmit.bind(this))}>
                 <Field

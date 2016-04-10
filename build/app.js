@@ -31073,15 +31073,11 @@
 	
 	var _react2 = _interopRequireDefault(_react);
 	
-	var _debounce = __webpack_require__(494);
-	
-	var _debounce2 = _interopRequireDefault(_debounce);
-	
 	var _reactRedux = __webpack_require__(484);
 	
-	var _actions = __webpack_require__(500);
+	var _actions = __webpack_require__(494);
 	
-	var _Field = __webpack_require__(501);
+	var _Field = __webpack_require__(495);
 	
 	var _Field2 = _interopRequireDefault(_Field);
 	
@@ -31098,6 +31094,8 @@
 	    password: ['minLength:6', 'doesNotMatch:password'],
 	    username: {
 	        test: function test(val) {
+	
+	            // Fake API call...
 	            return new Promise(function (resolve, reject) {
 	                return setTimeout(function () {
 	                    if (val == 'fail') {
@@ -31148,11 +31146,11 @@
 	        value: function render() {
 	            var _props = this.props;
 	            var fields = _props.fields;
+	            var onChange = _props.onChange;
+	            var onSubmit = _props.onSubmit;
+	            var onValidate = _props.onValidate;
 	            var submitting = _props.submitting;
 	            var submitted = _props.submitted;
-	            var onChange = _props.onChange;
-	            var onValidate = _props.onValidate;
-	            var onSubmit = _props.onSubmit;
 	            var valid = _props.valid;
 	            var email = fields.email;
 	            var username = fields.username;
@@ -31167,7 +31165,11 @@
 	                _react2.default.createElement(
 	                    'h1',
 	                    null,
-	                    'Redux Saga Validation'
+	                    _react2.default.createElement(
+	                        'a',
+	                        { href: 'https://github.com/npbee/react-redux-saga-validation-example' },
+	                        'Redux Saga Validation'
+	                    )
 	                ),
 	                _react2.default.createElement(
 	                    'form',
@@ -31239,12 +31241,22 @@
 	
 	function mapDispatchToProps(dispatch, ownProps) {
 	    return {
+	
+	        // We'll have each field call the `onChange` handler with its own
+	        // field name and new value
 	        onChange: function onChange(field, value) {
 	            return dispatch((0, _actions.changeValue)(field, value));
 	        },
+	
+	        // Each field will call the `onValidate` prop whenever it wants to
+	        // validate.  This will let the fields decide how and when they want to
+	        // validate themselves.
 	        onValidate: function onValidate(field, validation) {
 	            return dispatch((0, _actions.validate)(field, validation));
 	        },
+	
+	        // This is a curried function that takes the final submit function that
+	        // the component wants to call _after_ the fields have been validated
 	        onSubmit: function onSubmit(handler) {
 	            return function (e) {
 	                e.preventDefault();
@@ -31255,17 +31267,231 @@
 	    };
 	}
 	
+	// For this example, just connect the Root component to the entire state
 	exports.default = (0, _reactRedux.connect)(function (state) {
 	    return state;
 	}, mapDispatchToProps)(Root);
 
 /***/ },
 /* 494 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	var CHANGE_VALUE = exports.CHANGE_VALUE = 'CHANGE_VALUE';
+	var VALIDATE = exports.VALIDATE = 'VALIDATE';
+	var SET_INVALID = exports.SET_INVALID = 'SET_INVALID';
+	var SET_VALID = exports.SET_VALID = 'SET_VALID';
+	var SUBMIT = exports.SUBMIT = 'SUBMIT';
+	var SUBMITTING = exports.SUBMITTING = 'SUBMITTING';
+	var SUBMITTED = exports.SUBMITTED = 'SUBMITTED';
+	
+	// Change the value of a field to a new value
+	var changeValue = exports.changeValue = function changeValue(field, value) {
+	    return {
+	        type: CHANGE_VALUE,
+	        field: field,
+	        value: value
+	    };
+	};
+	
+	// Validate an individual field given a specific validation
+	var validate = exports.validate = function validate(field, validation) {
+	    return {
+	        type: VALIDATE,
+	        field: field,
+	        validation: validation
+	    };
+	};
+	
+	// Mark a field as invalid with a specific error message
+	var setInvalid = exports.setInvalid = function setInvalid(field, error) {
+	    return {
+	        type: SET_INVALID,
+	        field: field,
+	        error: error
+	    };
+	};
+	
+	// Mark the field as invalid with the error message to be removed
+	var setValid = exports.setValid = function setValid(field, error) {
+	    return {
+	        type: SET_VALID,
+	        field: field,
+	        error: error
+	    };
+	};
+	
+	// Submit the form
+	// We'll supply all of the validations for the form as well as a handler
+	// to call after the form has been validated
+	var submit = exports.submit = function submit(validations, handler) {
+	    return {
+	        type: SUBMIT,
+	        validations: validations,
+	        handler: handler
+	    };
+	};
+	
+	// Mark the form as submitting for display indication
+	var setSubmitting = exports.setSubmitting = function setSubmitting() {
+	    return {
+	        type: SUBMITTING
+	    };
+	};
+	
+	// Mark the form as submitted for display indication
+	var setSubmitted = exports.setSubmitted = function setSubmitted() {
+	    return {
+	        type: SUBMITTED
+	    };
+	};
+
+/***/ },
+/* 495 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isObject = __webpack_require__(495),
-	    now = __webpack_require__(496),
-	    toNumber = __webpack_require__(497);
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _react = __webpack_require__(296);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _debounce = __webpack_require__(496);
+	
+	var _debounce2 = _interopRequireDefault(_debounce);
+	
+	var _startCase = __webpack_require__(502);
+	
+	var _startCase2 = _interopRequireDefault(_startCase);
+	
+	var _noop = __webpack_require__(516);
+	
+	var _noop2 = _interopRequireDefault(_noop);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var Field = function (_Component) {
+	    _inherits(Field, _Component);
+	
+	    function Field(props) {
+	        _classCallCheck(this, Field);
+	
+	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Field).call(this, props));
+	
+	        _this.handleDebouncedInput = _this.props.validateOn === 'debouncedInput' ? (0, _debounce2.default)(_this.handleValidate.bind(_this), 300) : _noop2.default;
+	        return _this;
+	    }
+	
+	    _createClass(Field, [{
+	        key: 'handleChange',
+	        value: function handleChange(e) {
+	            var name = this.props.name;
+	            var value = e.target.value;
+	
+	
+	            this.props.onChange(name, value);
+	
+	            this.handleDebouncedInput();
+	        }
+	    }, {
+	        key: 'handleBlur',
+	        value: function handleBlur() {
+	            if (this.props.validateOn === 'blur') {
+	                return this.handleValidate();
+	            }
+	        }
+	    }, {
+	        key: 'handleValidate',
+	        value: function handleValidate() {
+	            var _props = this.props;
+	            var name = _props.name;
+	            var onValidate = _props.onValidate;
+	            var validation = _props.validation;
+	
+	
+	            return onValidate(name, validation);
+	        }
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	            var _props2 = this.props;
+	            var errors = _props2.errors;
+	            var name = _props2.name;
+	            var validated = _props2.validated;
+	            var validating = _props2.validating;
+	            var value = _props2.value;
+	
+	
+	            var hasErrors = errors.length > 0;
+	
+	            return _react2.default.createElement(
+	                'div',
+	                { className: 'field' },
+	                _react2.default.createElement(
+	                    'label',
+	                    null,
+	                    (0, _startCase2.default)(name)
+	                ),
+	                _react2.default.createElement('input', {
+	                    text: 'text',
+	                    value: value,
+	                    placeholder: name,
+	                    onChange: this.handleChange.bind(this),
+	                    onBlur: this.handleBlur.bind(this)
+	                }),
+	                validating && _react2.default.createElement(
+	                    'div',
+	                    { className: 'field-status field-status--loading' },
+	                    'Checking..'
+	                ),
+	                validated && !hasErrors && _react2.default.createElement(
+	                    'div',
+	                    { className: 'field-status field-status--validated' },
+	                    'Ok!'
+	                ),
+	                hasErrors && _react2.default.createElement(
+	                    'div',
+	                    { className: 'field-status field-staus--errors' },
+	                    errors.map(function (e) {
+	                        return _react2.default.createElement(
+	                            'div',
+	                            { key: e, className: 'field-status__error' },
+	                            e
+	                        );
+	                    })
+	                )
+	            );
+	        }
+	    }]);
+	
+	    return Field;
+	}(_react.Component);
+
+	exports.default = Field;
+
+/***/ },
+/* 496 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var isObject = __webpack_require__(497),
+	    now = __webpack_require__(498),
+	    toNumber = __webpack_require__(499);
 	
 	/** Used as the `TypeError` message for "Functions" methods. */
 	var FUNC_ERROR_TEXT = 'Expected a function';
@@ -31445,7 +31671,7 @@
 
 
 /***/ },
-/* 495 */
+/* 497 */
 /***/ function(module, exports) {
 
 	/**
@@ -31482,7 +31708,7 @@
 
 
 /***/ },
-/* 496 */
+/* 498 */
 /***/ function(module, exports) {
 
 	/**
@@ -31508,12 +31734,12 @@
 
 
 /***/ },
-/* 497 */
+/* 499 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isFunction = __webpack_require__(498),
-	    isObject = __webpack_require__(495),
-	    isSymbol = __webpack_require__(499);
+	var isFunction = __webpack_require__(500),
+	    isObject = __webpack_require__(497),
+	    isSymbol = __webpack_require__(501);
 	
 	/** Used as references for various `Number` constants. */
 	var NAN = 0 / 0;
@@ -31581,10 +31807,10 @@
 
 
 /***/ },
-/* 498 */
+/* 500 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isObject = __webpack_require__(495);
+	var isObject = __webpack_require__(497);
 	
 	/** `Object#toString` result references. */
 	var funcTag = '[object Function]',
@@ -31630,7 +31856,7 @@
 
 
 /***/ },
-/* 499 */
+/* 501 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var isObjectLike = __webpack_require__(465);
@@ -31673,210 +31899,6 @@
 	
 	module.exports = isSymbol;
 
-
-/***/ },
-/* 500 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	var CHANGE_VALUE = exports.CHANGE_VALUE = 'CHANGE_VALUE';
-	var VALIDATE = exports.VALIDATE = 'VALIDATE';
-	var SET_INVALID = exports.SET_INVALID = 'SET_INVALID';
-	var SET_VALID = exports.SET_VALID = 'SET_VALID';
-	var SUBMIT = exports.SUBMIT = 'SUBMIT';
-	var SUBMITTING = exports.SUBMITTING = 'SUBMITTING';
-	var SUBMITTED = exports.SUBMITTED = 'SUBMITTED';
-	
-	var changeValue = exports.changeValue = function changeValue(field, value) {
-	    return {
-	        type: CHANGE_VALUE,
-	        field: field,
-	        value: value
-	    };
-	};
-	
-	var validate = exports.validate = function validate(field, validation) {
-	    return {
-	        type: VALIDATE,
-	        field: field,
-	        validation: validation
-	    };
-	};
-	
-	var setInvalid = exports.setInvalid = function setInvalid(field, error) {
-	    return {
-	        type: SET_INVALID,
-	        field: field,
-	        error: error
-	    };
-	};
-	
-	var setValid = exports.setValid = function setValid(field, error) {
-	    return {
-	        type: SET_VALID,
-	        field: field,
-	        error: error
-	    };
-	};
-	
-	var submit = exports.submit = function submit(validations, handler) {
-	    return {
-	        type: SUBMIT,
-	        validations: validations,
-	        handler: handler
-	    };
-	};
-	
-	var setSubmitting = exports.setSubmitting = function setSubmitting() {
-	    return {
-	        type: SUBMITTING
-	    };
-	};
-	
-	var setSubmitted = exports.setSubmitted = function setSubmitted() {
-	    return {
-	        type: SUBMITTED
-	    };
-	};
-
-/***/ },
-/* 501 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	var _react = __webpack_require__(296);
-	
-	var _react2 = _interopRequireDefault(_react);
-	
-	var _debounce = __webpack_require__(494);
-	
-	var _debounce2 = _interopRequireDefault(_debounce);
-	
-	var _startCase = __webpack_require__(502);
-	
-	var _startCase2 = _interopRequireDefault(_startCase);
-	
-	var _noop = __webpack_require__(516);
-	
-	var _noop2 = _interopRequireDefault(_noop);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	
-	var Field = function (_Component) {
-	    _inherits(Field, _Component);
-	
-	    function Field(props) {
-	        _classCallCheck(this, Field);
-	
-	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Field).call(this, props));
-	
-	        _this.handleDebouncedInput = _this.props.validateOn === 'debouncedInput' ? (0, _debounce2.default)(_this.handleValidate.bind(_this), 300) : _noop2.default;
-	        return _this;
-	    }
-	
-	    _createClass(Field, [{
-	        key: 'handleChange',
-	        value: function handleChange(e) {
-	            var name = this.props.name;
-	            var value = e.target.value;
-	
-	
-	            this.props.onChange(name, value);
-	
-	            this.handleDebouncedInput();
-	        }
-	    }, {
-	        key: 'handleBlur',
-	        value: function handleBlur() {
-	            if (this.props.validateOn === 'blur') {
-	                return this.handleValidate();
-	            }
-	        }
-	    }, {
-	        key: 'handleValidate',
-	        value: function handleValidate() {
-	            var _props = this.props;
-	            var name = _props.name;
-	            var onValidate = _props.onValidate;
-	            var validation = _props.validation;
-	
-	
-	            return onValidate(name, validation);
-	        }
-	    }, {
-	        key: 'render',
-	        value: function render() {
-	            var _props2 = this.props;
-	            var errors = _props2.errors;
-	            var name = _props2.name;
-	            var validated = _props2.validated;
-	            var validating = _props2.validating;
-	            var value = _props2.value;
-	
-	
-	            var hasErrors = errors.length > 0;
-	
-	            return _react2.default.createElement(
-	                'div',
-	                { className: 'field' },
-	                _react2.default.createElement(
-	                    'label',
-	                    null,
-	                    (0, _startCase2.default)(name)
-	                ),
-	                _react2.default.createElement('input', {
-	                    text: 'text',
-	                    value: value,
-	                    placeholder: name,
-	                    onChange: this.handleChange.bind(this),
-	                    onBlur: this.handleBlur.bind(this)
-	                }),
-	                validating && _react2.default.createElement(
-	                    'div',
-	                    { className: 'field-status field-status--loading' },
-	                    'Checking..'
-	                ),
-	                validated && !hasErrors && _react2.default.createElement(
-	                    'div',
-	                    { className: 'field-status field-status--validated' },
-	                    'Ok!'
-	                ),
-	                hasErrors && _react2.default.createElement(
-	                    'div',
-	                    { className: 'field-status field-staus--errors' },
-	                    errors.map(function (e) {
-	                        return _react2.default.createElement(
-	                            'div',
-	                            { key: e, className: 'field-status__error' },
-	                            e
-	                        );
-	                    })
-	                )
-	            );
-	        }
-	    }]);
-	
-	    return Field;
-	}(_react.Component);
-
-	exports.default = Field;
 
 /***/ },
 /* 502 */
@@ -32061,7 +32083,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var Symbol = __webpack_require__(508),
-	    isSymbol = __webpack_require__(499);
+	    isSymbol = __webpack_require__(501);
 	
 	/** Used as references for various `Number` constants. */
 	var INFINITY = 1 / 0;
@@ -32465,6 +32487,7 @@
 	            var handledField = handleField(state.fields[field], action);
 	            var fields = _extends({}, state.fields, _defineProperty({}, field, handledField));
 	
+	            // Compute the overall validity from the individual field validity
 	            var valid = Object.keys(fields).every(function (name) {
 	                return fields[name].errors.length === 0;
 	            });
@@ -32487,7 +32510,7 @@
 	    }
 	};
 	
-	var _actions = __webpack_require__(500);
+	var _actions = __webpack_require__(494);
 	
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 	
@@ -32495,8 +32518,7 @@
 	    value: '',
 	    validated: false,
 	    validating: false,
-	    errors: [],
-	    touched: false
+	    errors: []
 	};
 	
 	function handleField(state, action) {
@@ -32515,8 +32537,7 @@
 	
 	
 	                return _extends({}, state, {
-	                    value: value,
-	                    touched: true
+	                    value: value
 	                });
 	            }
 	        case _actions.SET_INVALID:
@@ -32583,7 +32604,7 @@
 	
 	var _effects = __webpack_require__(519);
 	
-	var _actions = __webpack_require__(500);
+	var _actions = __webpack_require__(494);
 	
 	var _createValidator = __webpack_require__(520);
 	
@@ -32594,7 +32615,7 @@
 	var _marked = [handleValidate, handleSubmit, rootSaga].map(regeneratorRuntime.mark);
 	
 	function handleValidate(action) {
-	    var validation, field, allValid, validator, value, valid, error;
+	    var validation, field, validator, value, valid, error;
 	    return regeneratorRuntime.wrap(function handleValidate$(_context) {
 	        while (1) {
 	            switch (_context.prev = _context.next) {
@@ -32602,8 +32623,11 @@
 	                    validation = action.validation;
 	                    field = action.field;
 	
+	                    // If given an array of validation rules, we can yield a parallel saga to
+	                    // recursively call the `handleValidate` saga with the individual validation
+	
 	                    if (!Array.isArray(validation)) {
-	                        _context.next = 7;
+	                        _context.next = 6;
 	                        break;
 	                    }
 	
@@ -32615,63 +32639,65 @@
 	                    });
 	
 	                case 5:
-	                    allValid = _context.sent;
 	                    return _context.abrupt('return');
 	
-	                case 7:
-	                    _context.next = 9;
+	                case 6:
+	                    _context.next = 8;
 	                    return (0, _effects.call)(_createValidator2.default, validation);
 	
-	                case 9:
+	                case 8:
 	                    validator = _context.sent;
-	                    _context.next = 12;
+	                    _context.next = 11;
 	                    return (0, _effects.select)(function (state) {
 	                        return state.fields[field].value;
 	                    });
 	
-	                case 12:
+	                case 11:
 	                    value = _context.sent;
-	                    _context.prev = 13;
-	                    _context.next = 16;
+	                    _context.prev = 12;
+	                    _context.next = 15;
 	                    return (0, _effects.call)(validator.test, value);
 	
-	                case 16:
+	                case 15:
 	                    valid = _context.sent;
+	
+	
+	                    // Grab the potential here so that we can remove it if needed
 	                    error = validator.report(value);
 	
 	                    if (!valid) {
-	                        _context.next = 23;
+	                        _context.next = 22;
 	                        break;
 	                    }
 	
-	                    _context.next = 21;
+	                    _context.next = 20;
 	                    return (0, _effects.put)((0, _actions.setValid)(field, error));
 	
-	                case 21:
-	                    _context.next = 25;
+	                case 20:
+	                    _context.next = 24;
 	                    break;
 	
-	                case 23:
-	                    _context.next = 25;
+	                case 22:
+	                    _context.next = 24;
 	                    return (0, _effects.put)((0, _actions.setInvalid)(field, error));
 	
-	                case 25:
-	                    _context.next = 30;
+	                case 24:
+	                    _context.next = 29;
 	                    break;
 	
-	                case 27:
-	                    _context.prev = 27;
-	                    _context.t0 = _context['catch'](13);
+	                case 26:
+	                    _context.prev = 26;
+	                    _context.t0 = _context['catch'](12);
 	
 	                    // Async error
 	                    console.log(_context.t0);
 	
-	                case 30:
+	                case 29:
 	                case 'end':
 	                    return _context.stop();
 	            }
 	        }
-	    }, _marked[0], this, [[13, 27]]);
+	    }, _marked[0], this, [[12, 26]]);
 	}
 	
 	function handleSubmit(action) {
@@ -32689,15 +32715,22 @@
 	
 	                case 4:
 	                    state = _context2.sent;
-	                    fieldsNotValidated = Object.keys(state.fields).reduce(function (notValidated, key) {
-	                        var field = state.fields[key];
+	
+	
+	                    // Before submitting, find any fields that have not yet been validated so
+	                    // that we can validate them.
+	                    fieldsNotValidated = Object.keys(state.fields).reduce(function (notValidated, name) {
+	                        var field = state.fields[name];
 	
 	                        if (field.validated) {
 	                            return notValidated;
 	                        } else {
-	                            return notValidated.concat((0, _actions.validate)(key, validations[key]));
+	                            return notValidated.concat(name);
 	                        }
 	                    }, []);
+	
+	                    // If there are unvalidated fields, yield a parallel saga and dispatch
+	                    // actions to validaate each field
 	
 	                    if (!fieldsNotValidated.length) {
 	                        _context2.next = 11;
@@ -32705,7 +32738,9 @@
 	                    }
 	
 	                    _context2.next = 9;
-	                    return fieldsNotValidated.map(_effects.put);
+	                    return fieldsNotValidated.map(function (name) {
+	                        return (0, _effects.put)((0, _actions.validate)(name, validations[name]));
+	                    });
 	
 	                case 9:
 	                    _context2.next = 18;
@@ -32791,6 +32826,8 @@
 	
 	function createValidator(spec) {
 	
+	    // If we're given a string like 'minLength:3', we can see if it exists in
+	    // our globally defined rules.
 	    if (typeof spec === 'string') {
 	        var _spec$split = spec.split(':');
 	
@@ -32805,6 +32842,8 @@
 	            return createValidator(_extends({}, rule, {
 	                params: _params
 	            }));
+	        } else {
+	            // Whoops, rule not found...
 	        }
 	    }
 	
@@ -35427,7 +35466,7 @@
 /* 587 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isSymbol = __webpack_require__(499);
+	var isSymbol = __webpack_require__(501);
 	
 	/**
 	 * Casts `value` to a string if it's not a string or symbol.
@@ -35671,9 +35710,9 @@
 /* 595 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isFunction = __webpack_require__(498),
+	var isFunction = __webpack_require__(500),
 	    isHostObject = __webpack_require__(464),
-	    isObject = __webpack_require__(495),
+	    isObject = __webpack_require__(497),
 	    toSource = __webpack_require__(596);
 	
 	/**
@@ -36578,7 +36617,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var getLength = __webpack_require__(626),
-	    isFunction = __webpack_require__(498),
+	    isFunction = __webpack_require__(500),
 	    isLength = __webpack_require__(628);
 	
 	/**
@@ -37265,7 +37304,7 @@
 /* 646 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toNumber = __webpack_require__(497);
+	var toNumber = __webpack_require__(499);
 	
 	/** Used as references for various `Number` constants. */
 	var INFINITY = 1 / 0,

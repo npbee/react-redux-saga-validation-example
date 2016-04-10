@@ -11,8 +11,7 @@ const initialFieldState = {
     value: '',
     validated: false,
     validating: false,
-    errors: [],
-    touched: false
+    errors: []
 };
 
 function handleField(state, action) {
@@ -30,8 +29,7 @@ function handleField(state, action) {
 
             return {
                 ...state,
-                value,
-                touched: true
+                value
             };
         }
         case SET_INVALID: {
@@ -84,6 +82,7 @@ export default function(state = initialState, action) {
                 [field]: handledField
             };
 
+            // Compute the overall validity from the individual field validity
             const valid = Object.keys(fields)
                 .every(name => fields[name].errors.length === 0);
 

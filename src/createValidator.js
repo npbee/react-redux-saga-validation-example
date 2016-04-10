@@ -3,6 +3,8 @@ import omit from 'lodash/omit';
 
 export default function createValidator(spec) {
 
+    // If we're given a string like 'minLength:3', we can see if it exists in
+    // our globally defined rules.
     if (typeof spec === 'string') {
         const [name, params] = spec.split(':');
         const rule = rules[name];
@@ -12,6 +14,8 @@ export default function createValidator(spec) {
                 ...rule,
                 params
             });
+        } else {
+            // Whoops, rule not found...
         }
     }
 

@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import debounce from 'lodash/debounce';
 import { connect } from 'react-redux';
 
 import { changeValue, validate, submit } from './actions';
@@ -10,6 +9,8 @@ const validations = {
     password: ['minLength:6', 'doesNotMatch:password'],
     username: {
         test(val) {
+
+            // Fake API call...
             return new Promise((resolve, reject) => setTimeout(() => {
                 if (val == 'fail') {
                     resolve(false);
@@ -43,11 +44,11 @@ export class Root extends Component {
     render() {
         const {
             fields,
+            onChange,
+            onSubmit,
+            onValidate,
             submitting,
             submitted,
-            onChange,
-            onValidate,
-            onSubmit,
             valid
         } = this.props;
         const { email, username, password } = fields;
@@ -111,8 +112,18 @@ export class Root extends Component {
 
 function mapDispatchToProps(dispatch, ownProps) {
     return {
+
+        // We'll have each field call the `onChange` handler with its own
+        // field name and new value
         onChange: (field, value) => dispatch(changeValue(field, value)),
+
+        // Each field will call the `onValidate` prop whenever it wants to
+        // validate.  This will let the fields decide how and when they want to
+        // validate themselves.
         onValidate: (field, validation) => dispatch(validate(field, validation)),
+
+        // This is a curried function that takes the final submit function that
+        // the component wants to call _after_ the fields have been validated
         onSubmit: handler => e => {
             e.preventDefault();
 
@@ -121,4 +132,5 @@ function mapDispatchToProps(dispatch, ownProps) {
     };
 }
 
+// For this example, just connect the Root component to the entire state
 export default connect(state => state, mapDispatchToProps)(Root);

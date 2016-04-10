@@ -38,6 +38,36 @@ label,
     padding: 15px 10px;
 }
 
+button {
+    background: lightseagreen;
+    border: none;
+    border-radius: 3px;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 300;
+    outline: none;
+    padding: 10px;
+}
+button:disabled {
+    background: #d9d9d9;
+}
+
+pre {
+    background: #444;
+    border-radius: 3px;
+    color: #f9f9f9;
+    padding: 10px;
+}
+
+hr {
+    border: none;
+    outline: none;
+    margin: 2rem 0;
+    background: #d9d9d9;
+    height: 1px;
+    width: 100%;
+}
+
 .content {
     display: flex;
     flex-direction: column;
@@ -57,7 +87,7 @@ label,
 
 .field-status {
     color: #999999;
-    position: absolute;
+    /* position: absolute; */
     top: 0;
     right: 0;
 }

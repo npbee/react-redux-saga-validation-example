@@ -28,7 +28,7 @@
     "webpack-dev-server": "^1.14.1"
   },
   "scripts": {
-    "start": "webpack-dev-server --hot --progress --colors",
+    "start": "webpack-dev-server --hot --inline --progress --colors",
     "build": "webpack",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

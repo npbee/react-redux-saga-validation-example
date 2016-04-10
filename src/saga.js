@@ -4,11 +4,15 @@ import { put, select, fork, call } from 'redux-saga/effects';
 import {
     setValid,
     setInvalid,
+    SUBMIT,
+    setSubmitting,
+    setSubmitted,
+    validate,
     VALIDATE
 } from './actions';
 import createValidator from './createValidator';
 
-function* handleValidate (action) {
+function* handleValidate(action) {
     const { validation, field } = action;
 
     if (Array.isArray(validation)) {
@@ -21,7 +25,7 @@ function* handleValidate (action) {
     }
 
     const validator = yield call(createValidator, validation);
-    const value = yield select(state => state[field].value);
+    const value = yield select(state => state.fields[field].value);
 
     try {
         const valid = yield call(validator.test, value);
@@ -37,9 +41,39 @@ function* handleValidate (action) {
         // Async error
         console.log(e);
     }
+}
+
+function* handleSubmit(action) {
+    const { validations, handler } = action;
+    const state = yield select(state => state);
+    const fieldsNotValidated = Object.keys(state.fields).reduce((notValidated, key) => {
+        const field = state.fields[key];
+
+        if (field.validated) {
+            return notValidated;
+        } else {
+            return notValidated.concat(validate(key, validations[key]));
+        }
+
+    }, []);
+
+    if (fieldsNotValidated.length) {
+        yield fieldsNotValidated.map(put);
+    } else {
+        const values = Object.keys(state.fields).reduce((vals, name) => {
+            vals[name] = state.fields[name].value;
+
+            return vals;
+        }, {});
+
+        yield put(setSubmitting());
+        yield call(handler, values);
+        yield put(setSubmitted());
+    }
 
 }
 
 export default function* rootSaga() {
-    yield takeEvery(VALIDATE, handleValidate);
+    yield fork(takeEvery, VALIDATE, handleValidate);
+    yield fork(takeEvery, SUBMIT, handleSubmit);
 }

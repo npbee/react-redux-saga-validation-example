@@ -57,7 +57,7 @@ export default class Field extends Component {
                 Checking..
             </div>}
 
-            {validated && <div className='field-status field-status--validated'>
+            {validated && !hasErrors && <div className='field-status field-status--validated'>
                 Ok!
             </div>}
 

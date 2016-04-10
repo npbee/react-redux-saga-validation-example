@@ -3,11 +3,7 @@ var autoprefixer = require('autoprefixer');
 
 module.exports = {
     devtool: 'source-map',
-    entry: [
-        'webpack-dev-server/client?http://0.0.0.0:8080',
-        'webpack/hot/only-dev-server',
-        './src/app'
-    ],
+    entry: './src/app',
     output: {
         path: './build',
         publicPath: '/build',

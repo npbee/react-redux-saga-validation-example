@@ -2,14 +2,17 @@ import {
     VALIDATE,
     SET_VALID,
     SET_INVALID,
-    CHANGE_VALUE
+    CHANGE_VALUE,
+    SUBMITTING,
+    SUBMITTED
 } from './actions';
 
 const initialFieldState = {
     value: '',
     validated: false,
     validating: false,
-    errors: []
+    errors: [],
+    touched: false
 };
 
 function handleField(state, action) {
@@ -27,7 +30,8 @@ function handleField(state, action) {
 
             return {
                 ...state,
-                value
+                value,
+                touched: true
             };
         }
         case SET_INVALID: {
@@ -36,7 +40,7 @@ function handleField(state, action) {
             return {
                 ...state,
                 validating: false,
-                validated: false,
+                validated: true,
                 errors: state.errors.concat(error)
             };
         }
@@ -46,7 +50,7 @@ function handleField(state, action) {
             return {
                 ...state,
                 validating: false,
-                validated: state.errors.length === 0,
+                validated: true,
                 errors: state.errors.filter(e => e !== error)
             };
         }
@@ -57,9 +61,14 @@ function handleField(state, action) {
 
 
 const initialState = {
-    username: { ...initialFieldState },
-    email: { ...initialFieldState },
-    password: { ...initialFieldState }
+    fields: {
+        username: { ...initialFieldState },
+        email: { ...initialFieldState },
+        password: { ...initialFieldState }
+    },
+    submitting: false,
+    submitted: false,
+    valid: true
 };
 
 export default function(state = initialState, action) {
@@ -69,11 +78,30 @@ export default function(state = initialState, action) {
         case SET_INVALID:
         case VALIDATE:
             const { field } = action;
-            const handledField = handleField(state[field], action);
+            const handledField = handleField(state.fields[field], action);
+            const fields = {
+                ...state.fields,
+                [field]: handledField
+            };
+
+            const valid = Object.keys(fields)
+                .every(name => fields[name].errors.length === 0);
 
             return {
                 ...state,
-                [field]: handledField
+                fields,
+                valid
+            };
+        case SUBMITTING:
+            return {
+                ...state,
+                submitting: true
+            };
+        case SUBMITTED:
+            return {
+                ...state,
+                submitting: false,
+                submitted: true
             };
         default:
             return state;
